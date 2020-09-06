@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const ArticleSchema = mongoose.Schema({
+const CategorySchema = mongoose.Schema({
 	title: {
 		type: String,
 		required: true,
@@ -24,12 +24,6 @@ const ArticleSchema = mongoose.Schema({
 	metaDesc: {
 		type: String,
 	},
-	categories: [
-		{
-			type: mongoose.Schema.Types.ObjectId,
-			ref: 'Category',
-		},
-	],
 });
 
-module.exports = mongoose.model('Article', ArticleSchema);
+module.exports = mongoose.model('Category', CategorySchema);
