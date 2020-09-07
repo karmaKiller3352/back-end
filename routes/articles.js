@@ -1,8 +1,23 @@
 const express = require('express');
 const router = express.Router();
 const Article = require('../models/Article');
-const makePageUrl = require('../utils/makePageUrl');
 
+const makePageUrl = require('../utils/makePageUrl');
+const multer = require('multer');
+const storage = multer.diskStorage({
+	destination: (req, file, cb) => {
+		cb(null, './uploads/')
+	},
+	filename: (req, file, cb) => {
+		cb(null, file.originalname)
+	},
+})
+const upload = multer({
+	storage,
+	limits: {
+		fileSize: 1024 * 1024 * 3,
+	}
+})
 //Routes
 
 // return all articles
@@ -21,7 +36,8 @@ router.get('/', async (req, res) => {
 });
 
 // add article
-router.post('/', async (req, res) => {
+router.post('/', upload.array('images'), async (req, res) => {
+	console.log(req.files)
 	const article = new Article({
 		...req.body,
 		metaTitle: req.body.metaTitle || req.body.title,
