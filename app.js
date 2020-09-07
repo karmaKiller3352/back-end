@@ -17,22 +17,22 @@ app.use('/categories', categoriesRoute);
 // Routes
 
 app.get('/', (req, res) => {
-	res.send(makePageUrl(' Однажды d студенную! зимнюю пору!'));
+  res.send(makePageUrl(' Однажды d студенную! зимнюю пору!'));
 });
 
 //Connect to DB
 mongoose.connect(
-	process.env.DB_CONNECTION,
+  process.env.DB_CONNECTION,
 
-	{
-		useUnifiedTopology: true,
-		useCreateIndex: true,
-		useNewUrlParser: true,
-	},
-	(e) => {
-		console.log('connected');
-		console.log(e);
-	}
+  {
+    useUnifiedTopology: true,
+    useCreateIndex: true,
+    useNewUrlParser: true,
+  },
+  (e) => {
+    console.log('connected');
+    console.log(e);
+  }
 );
 
 app.listen(5000);
