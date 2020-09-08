@@ -1,23 +1,35 @@
 const express = require('express');
 const router = express.Router();
-const Article = require('../models/Article');
-
-const makePageUrl = require('../utils/makePageUrl');
 const multer = require('multer');
+
+const Article = require('../models/Article');
+const formatDate = require('../utils/formatDate');
+const makePageUrl = require('../utils/makePageUrl');
+
 const storage = multer.diskStorage({
 	destination: (req, file, cb) => {
-		cb(null, './uploads/')
+		cb(null, './uploads/');
 	},
 	filename: (req, file, cb) => {
-		cb(null, file.originalname)
+		cb(null, `_${file.originalname}`);
 	},
-})
+});
+
+const fileFilter = (req, file, cb) => {
+	if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
+		cb(null, true);
+	} else {
+		cb(new Error('Invalid file type'), false);
+	}
+};
+
 const upload = multer({
 	storage,
+	fileFilter,
 	limits: {
 		fileSize: 1024 * 1024 * 3,
-	}
-})
+	},
+});
 //Routes
 
 // return all articles
@@ -36,10 +48,11 @@ router.get('/', async (req, res) => {
 });
 
 // add article
-router.post('/', upload.array('images'), async (req, res) => {
-	console.log(req.files)
+router.post('/', upload.single('image'), async (req, res) => {
+	console.log(req.file);
 	const article = new Article({
 		...req.body,
+		image: req.file.path,
 		metaTitle: req.body.metaTitle || req.body.title,
 		url: makePageUrl(req.body.title),
 	});

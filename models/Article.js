@@ -24,6 +24,9 @@ const ArticleSchema = mongoose.Schema({
 	metaDesc: {
 		type: String,
 	},
+	image: {
+		type: String,
+	},
 	categories: [
 		{
 			type: mongoose.Schema.Types.ObjectId,
