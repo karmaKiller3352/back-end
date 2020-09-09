@@ -1,35 +1,37 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const morgan = require("morgan");
-
+const morgan = require('morgan');
 require('dotenv/config');
+const app = express();
+app.use(morgan('dev'));
 
 const articlesRoute = require('./routes/articles');
 const categoriesRoute = require('./routes/categories');
+const imageUpload = require('./routes/imageUpload');
 const makePageUrl = require('./utils/makePageUrl');
 
-
-const app = express();
-
 //Middlewares
-app.use(morgan('dev'));
+
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header(
+    'Access-Control-Allow-Headers',
+    'Origin, X-Requested-With, Content-Type, Accept, Authorization'
+  );
 
-  if(req.method === "OPTIONS") {
-    res.header("Access-Control-Allow-Methods","PUT, POST, PATCH, DELETE, GET");
+  if (req.method === 'OPTIONS') {
+    res.header('Access-Control-Allow-Methods', 'PUT, POST, PATCH, DELETE, GET');
     return res.status(200).json({});
   }
   next();
-})
+});
 
 app.use('/articles', articlesRoute);
 app.use('/categories', categoriesRoute);
-
+app.use('/image-upload', imageUpload);
 
 // Routes
 app.get('/', (req, res) => {
@@ -37,19 +39,19 @@ app.get('/', (req, res) => {
 });
 
 app.use((req, res, next) => {
-  const error = new Error("Not found");
+  const error = new Error('Not found');
   error.status = 404;
   next(error);
-})
+});
 
 app.use((error, req, res, next) => {
   res.status(error.status || 500);
   res.json({
     error: {
-      message: error.message
-    }
-  })
-})
+      message: error.message,
+    },
+  });
+});
 
 //Connect to DB
 mongoose.connect(
@@ -66,4 +68,4 @@ mongoose.connect(
   }
 );
 
-app.listen(5000);
+app.listen(2000);
