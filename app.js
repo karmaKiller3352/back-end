@@ -29,6 +29,8 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use('/uploads/images/', express.static(__dirname + '/public/uploads/images'));
+
 app.use('/articles', articlesRoute);
 app.use('/categories', categoriesRoute);
 app.use('/image-upload', imageUpload);

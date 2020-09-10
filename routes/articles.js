@@ -54,7 +54,7 @@ router.post('/', upload.single('image'), async (req, res) => {
 		...req.body,
 		image: req.file.path,
 		metaTitle: req.body.metaTitle || req.body.title,
-		url: makePageUrl(req.body.title),
+		url: req.body.url || makePageUrl(req.body.title),
 	});
 
 	try {
@@ -82,10 +82,10 @@ router.get('/:articleId', async (req, res) => {
 // delete article by ID
 router.delete('/:articleId', async (req, res) => {
 	try {
-		const removedPost = await Article.deleteOne({
+		await Article.deleteOne({
 			_id: req.params.articleId,
 		});
-		res.status(204).json(removedPost);
+		res.status(204).json({});
 	} catch (error) {
 		res.status(404).json(error);
 	}
