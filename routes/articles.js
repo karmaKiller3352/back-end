@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
+const mongooseErrorHandler = require('mongoose-error-handler');
 
 const Article = require('../models/Article');
 const formatDate = require('../utils/formatDate');
@@ -8,7 +9,7 @@ const makePageUrl = require('../utils/makePageUrl');
 
 const storage = multer.diskStorage({
 	destination: (req, file, cb) => {
-		cb(null, './uploads/');
+		cb(null, './public/uploads/images/');
 	},
 	filename: (req, file, cb) => {
 		cb(null, `_${file.originalname}`);
@@ -40,6 +41,7 @@ router.get('/', async (req, res) => {
 				path: 'categories',
 				select: ['title', 'url'],
 			})
+			.sort({ date: -1 })
 			.limit(20);
 		res.status(200).json(articlles);
 	} catch (error) {
@@ -49,10 +51,11 @@ router.get('/', async (req, res) => {
 
 // add article
 router.post('/', upload.single('image'), async (req, res) => {
-	console.log(req.file);
 	const article = new Article({
 		...req.body,
-		image: req.file.path,
+		image: req.file
+			? `${process.env.DEV_HOST}/uploads/images/${req.file.filename}`
+			: '',
 		metaTitle: req.body.metaTitle || req.body.title,
 		url: req.body.url || makePageUrl(req.body.title),
 	});
@@ -67,7 +70,6 @@ router.post('/', upload.single('image'), async (req, res) => {
 
 // return article by ID
 router.get('/:articleId', async (req, res) => {
-	console.log(req.params.articleId);
 	try {
 		const article = await Article.findById(req.params.articleId).populate({
 			path: 'categories',
@@ -92,11 +94,20 @@ router.delete('/:articleId', async (req, res) => {
 });
 
 // update article by ID
-router.patch('/:articleId', async (req, res) => {
+router.patch('/:articleId', upload.single('image'), async (req, res) => {
 	try {
 		const updatedPost = await Article.updateOne(
 			{ _id: req.params.articleId },
-			{ $set: { ...req.body } }
+			{
+				$set: {
+					...req.body,
+					image: req.file
+						? `${process.env.DEV_HOST}/uploads/images/${req.file.filename}`
+						: '',
+					metaTitle: req.body.metaTitle || req.body.title,
+					url: req.body.url || makePageUrl(req.body.title),
+				},
+			}
 		);
 		res.status(200).json(updatedPost);
 	} catch (error) {

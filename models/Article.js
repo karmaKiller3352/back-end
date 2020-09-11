@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-
+const uniqueValidator = require('mongoose-unique-validator');
 const ArticleSchema = mongoose.Schema({
 	title: {
 		type: String,
@@ -27,12 +27,12 @@ const ArticleSchema = mongoose.Schema({
 	image: {
 		type: String,
 	},
-	categories: [
-		{
-			type: mongoose.Schema.Types.ObjectId,
-			ref: 'Category',
-		},
-	],
+	categories: {
+		type: mongoose.Schema.Types.ObjectId,
+		ref: 'Category',
+	},
 });
+
+ArticleSchema.plugin(uniqueValidator);
 
 module.exports = mongoose.model('Article', ArticleSchema);
