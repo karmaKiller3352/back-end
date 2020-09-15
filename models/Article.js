@@ -32,7 +32,7 @@ const ArticleSchema = mongoose.Schema({
 		ref: 'Category',
 	},
 });
-
+ArticleSchema.index({title: 'text', content: 'text'});
 ArticleSchema.plugin(uniqueValidator);
 
 module.exports = mongoose.model('Article', ArticleSchema);
