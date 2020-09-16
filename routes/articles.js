@@ -36,26 +36,39 @@ const upload = multer({
 
 // return all articles
 router.get('/', async (req, res) => {
+  const perPage = 5;
+  const page = req.query.page;
+	const query = {};
+	if (
+		req.query.hasOwnProperty('categories') &&
+		req.query.categories &&
+		req.query.categories !== 'Not choosed'
+	) {
+		query['categories'] = req.query.categories;
+	}
+	if (req.query.hasOwnProperty('search') && req.query.search) {
+		query['$text'] = {
+			$search: req.query.search,
+		};
+	}
+	
 	try {
-		console.log(req.query);
-		console.log('here');
-		const page = req.query.page;
-		const categories = req.query.category ? req.query.category : null;
-		const searchString = req.query.search ? req.query.search : '';
-		const query = req.query.search
-			? {
-					$text: { $search: searchString },
-			  }
-			: null;
-		console.log(query);
-		const articlles = await Article.find(query)
+    const numOfArticles = await Article.count(query);
+		const articles = await Article.find(query)
 			.populate({
 				path: 'categories',
 				select: ['title', 'url'],
-			})
+      })
+      .skip((perPage * page) - perPage)
+      .limit(perPage)
 			.sort({ date: -1 })
-			.limit(20);
-		res.status(200).json(articlles);
+		res.status(200).json({
+      articles,
+      count: numOfArticles,
+      page,
+      pages: Math.ceil(numOfArticles / perPage), 
+    }
+   );
 	} catch (error) {
 		res.status(404).json(error);
 	}
