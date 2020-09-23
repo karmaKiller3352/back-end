@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-
+const uniqueValidator = require('mongoose-unique-validator');
 const CategorySchema = mongoose.Schema({
   title: {
     type: String,
@@ -24,10 +24,8 @@ const CategorySchema = mongoose.Schema({
   metaDesc: {
     type: String,
   },
-  articles: {
-    type: Array,
-    default: [],
-  },
 });
+CategorySchema.index({title: 'text', content: 'text'});
+CategorySchema.plugin(uniqueValidator);
 
 module.exports = mongoose.model('Category', CategorySchema);

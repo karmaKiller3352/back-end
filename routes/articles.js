@@ -36,8 +36,8 @@ const upload = multer({
 
 // return all articles
 router.get('/', async (req, res) => {
-  const perPage = 5;
-  const page = req.query.page;
+  const perPage = 10;
+  const page = req.query.page || 1;
 	const query = {};
 	if (
 		req.query.hasOwnProperty('categories') &&
