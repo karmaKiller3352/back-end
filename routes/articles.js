@@ -36,8 +36,8 @@ const upload = multer({
 
 // return all articles
 router.get('/', async (req, res) => {
-  const perPage = 10;
-  const page = req.query.page || 1;
+	const perPage = 1;
+	const page = req.query.page || 1;
 	const query = {};
 	if (
 		req.query.hasOwnProperty('categories') &&
@@ -51,24 +51,25 @@ router.get('/', async (req, res) => {
 			$search: req.query.search,
 		};
 	}
-	
+
 	try {
-    const numOfArticles = await Article.count(query);
+		const numOfArticles = await Article.count(query);
 		const articles = await Article.find(query)
 			.populate({
 				path: 'categories',
 				select: ['title', 'url'],
-      })
-      .skip((perPage * page) - perPage)
-      .limit(perPage)
-			.sort({ date: -1 })
+			})
+			.skip(perPage * page - perPage)
+			.limit(perPage)
+			.sort({ date: -1 });
 		res.status(200).json({
-      articles,
-      count: numOfArticles,
-      page,
-      pages: Math.ceil(numOfArticles / perPage), 
-    }
-   );
+			articles,
+			pagination: {
+				count: numOfArticles,
+				page,
+				pages: Math.ceil(numOfArticles / perPage),
+			},
+		});
 	} catch (error) {
 		res.status(404).json(error);
 	}

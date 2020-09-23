@@ -24,9 +24,11 @@ router.get('/', async (req, res) => {
 			.sort({ date: -1 });
 		res.status(200).json({
 			categories,
-			count: numOfCat,
-			page,
-			pages: Math.ceil(numOfCat / perPage),
+			pagination: {
+				count: numOfCat,
+				page,
+				pages: Math.ceil(numOfCat / perPage),
+			},
 		});
 	} catch (error) {
 		console.log(error);
