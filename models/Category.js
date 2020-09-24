@@ -24,6 +24,13 @@ const CategorySchema = mongoose.Schema({
   metaDesc: {
     type: String,
   },
+  image: {
+		type: String,
+	},
+  articles: {
+		type: mongoose.Schema.Types.ObjectId,
+		ref: 'Article',
+	},
 });
 CategorySchema.index({title: 'text', content: 'text'});
 CategorySchema.plugin(uniqueValidator);

@@ -1,14 +1,41 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
 const Category = require('../models/Category');
 const Article = require('../models/Article');
 const makePageUrl = require('../utils/makePageUrl');
+
+
+const storage = multer.diskStorage({
+	destination: (req, file, cb) => {
+		cb(null, './public/uploads/images/');
+	},
+	filename: (req, file, cb) => {
+		cb(null, `_${file.originalname}`);
+	},
+});
+
+const fileFilter = (req, file, cb) => {
+	if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
+		cb(null, true);
+	} else {
+		cb(new Error('Invalid file type'), false);
+	}
+};
+
+const upload = multer({
+	storage,
+	fileFilter,
+	limits: {
+		fileSize: 1024 * 1024 * 3,
+	},
+});
 
 //Routes
 
 // return all Categories
 router.get('/', async (req, res) => {
-	const perPage = 2;
+	const perPage = 10;
 	const page = req.query.page || 1;
 	const query = {};
 	if (req.query.hasOwnProperty('search') && req.query.search) {
@@ -37,19 +64,21 @@ router.get('/', async (req, res) => {
 });
 
 // add Category
-router.post('/', async (req, res) => {
-	console.log(req.body);
+router.post('/', upload.single('image'), async (req, res) => {
 	const category = new Category({
-		title: req.body.title,
-		content: req.body.content,
-		url: makePageUrl(req.body.title),
+		...req.body,
+		image: req.file
+			? `${process.env.DEV_HOST}/uploads/images/${req.file.filename}`
+			: '',
+		metaTitle: req.body.metaTitle || req.body.title,
+		url: req.body.url || makePageUrl(req.body.title),
 	});
 
 	try {
-		const savedCat = await category.save();
-		res.status(201).json(savedCat);
+		const savedCategory = await category.save();
+		res.status(201).json(savedCategory);
 	} catch (error) {
-		res.status(400).json(error);
+		res.status(404).json(error);
 	}
 });
 
@@ -60,9 +89,11 @@ router.get('/:categoryId', async (req, res) => {
 		const category = await Category.findById(req.params.categoryId);
 		const articles = await Article.find({
 			categories: req.params.categoryId,
-		}).limit(20);
-		category['articles'] = articles;
-		res.status(200).json(category);
+		}).limit(100);
+		res.status(200).json({
+      category: category,
+      articles: articles,
+    });
 	} catch (error) {
 		res.status(404).json(error);
 	}
@@ -81,13 +112,22 @@ router.delete('/:categoryId', async (req, res) => {
 });
 
 // update Category by ID
-router.patch('/:categoryId', async (req, res) => {
+router.patch('/:categoryId', upload.single('image'), async (req, res) => {
+	const updatedCategory = await Category.updateOne(
+		{ _id: req.params.categoryId },
+		{
+			$set: {
+				...req.body,
+				image: req.file
+					? `${process.env.DEV_HOST}/uploads/images/${req.file.filename}`
+					: req.body.image,
+				metaTitle: req.body.metaTitle || req.body.title,
+				url: req.body.url || makePageUrl(req.body.title),
+			},
+		}
+	);
+	res.status(200).json(updatedCategory);
 	try {
-		const updatedCat = await Category.updateOne(
-			{ _id: req.params.categoryId },
-			{ $set: { ...req.body } }
-		);
-		res.status(200).json(updatedCat);
 	} catch (error) {
 		res.status(404).json(error);
 	}

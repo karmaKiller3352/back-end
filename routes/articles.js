@@ -4,7 +4,6 @@ const multer = require('multer');
 const mongooseErrorHandler = require('mongoose-error-handler');
 
 const Article = require('../models/Article');
-const formatDate = require('../utils/formatDate');
 const makePageUrl = require('../utils/makePageUrl');
 const e = require('express');
 
@@ -36,7 +35,7 @@ const upload = multer({
 
 // return all articles
 router.get('/', async (req, res) => {
-	const perPage = 1;
+	const perPage = 10;
 	const page = req.query.page || 1;
 	const query = {};
 	if (
