@@ -5,6 +5,10 @@ const CategorySchema = mongoose.Schema({
     type: String,
     required: true,
   },
+  active: {
+    type: Boolean,
+    default: true,
+  },
   content: {
     type: String,
     required: true,

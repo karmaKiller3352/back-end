@@ -4,7 +4,11 @@ const ArticleSchema = mongoose.Schema({
 	title: {
 		type: String,
 		required: true,
-	},
+  },
+  active: {
+    type: Boolean,
+    default: true,
+  },
 	content: {
 		type: String,
 		required: true,

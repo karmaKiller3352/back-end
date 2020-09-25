@@ -123,21 +123,28 @@ const removeRef = (field, ref) => (field ? {} : { [ref]: field });
 
 // update article by ID
 router.patch('/:articleId', upload.single('image'), async (req, res) => {
-	const updatedArticle = await Article.updateOne(
-		{ _id: req.params.articleId },
-		{
-			$unset: removeRef(req.body.categories, 'categories'),
-			$set: {
-				...req.body,
-				image: req.file
-					? `${process.env.DEV_HOST}/uploads/images/${req.file.filename}`
-					: req.body.image,
-				metaTitle: req.body.metaTitle || req.body.title,
-				url: req.body.url || makePageUrl(req.body.title),
-			},
-		}
-	);
-	res.status(200).json(updatedArticle);
+	if (req.body.active) {
+		const updatedActivityArticle = await Article.updateOne(
+			{ _id: req.params.articleId },
+			{ $set: { ...req.body } }
+    );
+    res.status(200).json(updatedActivityArticle);
+	} else {
+		const updatedArticle = await Article.updateOne(
+			{ _id: req.params.articleId },
+			{
+				$unset: removeRef(req.body.categories, 'categories'),
+				$set: {
+					...req.body,
+					image: req.file
+						? `${process.env.DEV_HOST}/uploads/images/${req.file.filename}`
+						: req.body.image,
+				},
+			}
+		);
+		res.status(200).json(updatedArticle);
+	}
+
 	try {
 	} catch (error) {
 		res.status(404).json(error);
