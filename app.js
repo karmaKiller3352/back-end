@@ -10,6 +10,7 @@ app.use(morgan("dev"));
 
 const articlesRoute = require("./routes/articles");
 const categoriesRoute = require("./routes/categories");
+const userRoute = require("./routes/user");
 const imageUpload = require("./routes/imageUpload");
 const makePageUrl = require("./utils/makePageUrl");
 
@@ -37,6 +38,7 @@ app.use(
 );
 
 app.use("/articles/", articlesRoute);
+app.use("/users/", userRoute);
 app.use("/categories/", categoriesRoute);
 app.use("/image-upload/", imageUpload);
 
